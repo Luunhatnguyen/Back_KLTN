@@ -1,0 +1,127 @@
+
+{% extends 'layouts/base.html' %}
+{% block content %}
+{% if user.is_superuser %}
+<h1 class="text-center text-info">Thống Kê</h1>
+
+<br />
+<br />
+<div class="row" style="margin-left:275px">
+  {% if month_revenue and year_revenue %}
+      <h1 class="text-center text-info" style="padding-right:300px">Doanh thu theo tuyến tháng {{month_revenue}}, năm {{year_revenue}}</h1>
+      <h1 class="text-center text-info" >Phần trăm là {{revenuePercent}} của tất cả</h1>
+  {% elif month_revenue %}
+      <h1 class="text-center text-info" style="padding-right:300px">Doanh thu theo tuyến tháng {{month_revenue}}</h1>
+      <h1 class="text-center text-info">Phần trăm là {{revenuePercent}} của tháng</h1>
+  {% elif year_revenue %}
+      <h1 class="text-center text-info" style="padding-right:300px">Doanh thu theo tuyến năm {{year_revenue}}</h1>
+      <h1 class="text-center text-info">Phần trăm là {{revenuePercent}} của tất cả</h1>
+  {% else %}
+      <h1 class="text-center text-info">Doanh thu theo tuyến</h1>
+  {% endif %}
+  </div>
+<div class="row">
+  <div class="col-md-6 col-xs-12">
+      <canvas id="revenueChartId" height="200"></canvas>
+  </div>
+  <div class="col-md-5 col-xs-12">
+    <form action="" method="get">
+
+      <label style="width: 120px">Tháng</label>
+      <div class="form-group">
+        <select
+          class="usa-select"
+          name="month_revenue"
+          style="width: 75%; height: 50px; margin: 5px;"
+        >
+          <option selected="selected" value="">Tìm theo</option>
+          <option value="1">Tháng 1</option>
+          <option value="2">Tháng 2</option>
+          <option value="3">Tháng 3</option>
+          <option value="4">Tháng 4</option>
+          <option value="5">Tháng 5</option>
+          <option value="6">Tháng 6</option>
+          <option value="7">Tháng 7</option>
+          <option value="8">Tháng 8</option>
+          <option value="9">Tháng 9</option>
+          <option value="10">Tháng 10</option>
+          <option value="11">Tháng 11</option>
+          <option value="12">Tháng 12</option>
+        </select>
+        <label style="width: 120px">Năm</label>
+        <select
+          class="usa-select"
+          name="year_revenue"
+          style="width: 75%; height: 50px; margin: 5px;"
+        >
+          <option selected="selected" value="">Tìm theo</option>
+          {% for i in year_range %}
+          <option value="{{i}}">{{i}}</option>
+          {% endfor %}
+        </select>
+        <input type="submit" value="Thống kê" class="btn btn-danger" />
+      </div>
+    </form>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+const fixFloat = (value) => {
+  return `${value.toFixed(2)}%`
+}
+
+      let labels = [], labels2 = []
+      let data = [], data2 = []
+      let colors = [], colors2 = []
+      let borderColors = [], borderColors2 = []
+      let rc, gc, bc;
+
+
+
+      {% for r in revenue %}
+      labels2.push('{{r}}')
+      data2.push('{{r.total}}')
+
+      r = parseInt(Math.random() * 255)
+      g = parseInt(Math.random() * 255)
+      b = parseInt(Math.random() * 255)
+
+      colors2.push(`rgba(${r}, ${g}, ${b}, 0.2)`)
+      borderColors2.push(`rgba(${r}, ${g}, ${b}, 1)`)
+      {% endfor %}
+
+window.onload = function() {
+
+          const ctx2 = document.getElementById('revenueChartId').getContext('2d');
+
+          loadChart(ctx2, labels2, data2, 'bar', colors2, borderColors2);
+      }
+
+  function loadChart(ctx2, labels2, data2, type, colors2, borderColors2) {
+      const myChart = new Chart(ctx2, {
+          type: 'line',
+          data: {
+              labels: labels2,
+              datasets: [{
+                  label: '',
+                  data: data2,
+                  backgroundColor: colors2,
+                  borderColor: borderColors2,
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
+  }
+</script>
+{% else %}
+<h1 class="text-center text-danger">YOU ARE DO NOT HAVE PERMISSION TO SEE THIS VIEW!!</h1>
+{% endif %}
+{% endblock %}
